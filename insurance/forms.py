@@ -39,10 +39,11 @@ class RiskFieldForm(forms.ModelForm):
             if "." in value:
                 raise ValidationError("Integer number allowed only!")
         if field_type == 'DateField':
-            try:
-                datetime.strptime(value, '%Y-%m-%d')
-            except ValueError:
-                raise ValidationError('Default date must be in "YYYY-MM-DD" format')
+            if value:
+                try:
+                    datetime.strptime(value, '%Y-%m-%d')
+                except ValueError:
+                    raise ValidationError('Default date must be in "YYYY-MM-DD" format')
         if risk_id and risk_field_instance.id is None:
             if value == "" and null_value == False:
                 raise ValidationError("Null can not be false while default is empty")

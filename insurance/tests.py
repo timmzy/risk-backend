@@ -47,20 +47,17 @@ class ModelTest(TestCase):
         Initialize certain process/actions
         """
         self.client.force_login(User.objects.create_superuser('admin_test', '123'))
-        self.post_data = {'name': ['Car'], 'description': ['This is for an insurance'], 'fields-TOTAL_FORMS': ['3'],
+        self.post_data = {'name': ['Car'], 'description': ['This is for an insurance'], 'fields-TOTAL_FORMS': ['2'],
                           'fields-INITIAL_FORMS': ['0'], 'fields-MIN_NUM_FORMS': ['0'],
-                          'fields-MAX_NUM_FORMS': ['1000'],
-                          'fields-0-id': [''], 'fields-0-risk': [''], 'fields-0-name': ['name'],
-                          'fields-0-field_type': ['CharField'], 'fields-0-max_length': ['20'], 'fields-0-default': [''],
-                          'fields-0-kwargs': [''], 'fields-1-id': [''], 'fields-1-risk': [''], 'fields-1-name': ['age'],
+                          'fields-MAX_NUM_FORMS': ['1000'], 'fields-0-id': [''], 'fields-0-risk': [''],
+                          'fields-0-name': ['name'], 'fields-0-field_type': ['CharField'],
+                          'fields-0-max_length': ['20'], 'fields-0-default': [''], 'fields-0-kwargs': [''],
+                          'fields-1-id': [''], 'fields-1-risk': [''], 'fields-1-name': ['age'],
                           'fields-1-field_type': ['IntegerField'], 'fields-1-max_length': [''],
-                          'fields-1-default': [''],
-                          'fields-1-kwargs': [''], 'fields-2-id': [''], 'fields-2-risk': [''], 'fields-2-name': [''],
-                          'fields-2-field_type': ['CharField'], 'fields-2-max_length': [''], 'fields-2-default': [''],
-                          'fields-2-kwargs': [''], 'fields-__prefix__-id': [''], 'fields-__prefix__-risk': [''],
-                          'fields-__prefix__-name': [''], 'fields-__prefix__-field_type': ['CharField'],
-                          'fields-__prefix__-max_length': [''], 'fields-__prefix__-default': [''],
-                          'fields-__prefix__-kwargs': [''], '_save': ['Save']}
+                          'fields-1-default': [''], 'fields-1-kwargs': [''], 'fields-__prefix__-id': [''],
+                          'fields-__prefix__-risk': [''], 'fields-__prefix__-name': [''],
+                          'fields-__prefix__-field_type': [''], 'fields-__prefix__-max_length': [''],
+                          'fields-__prefix__-default': [''], 'fields-__prefix__-kwargs': [''], '_save': ['Save']}
         self.client.post('/admin/insurance/risk/add/', data=self.post_data)
 
     def test_post_admin(self):

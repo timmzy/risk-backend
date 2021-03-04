@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import RiskField
+from .models import RiskField, EnumChoice
 from datetime import datetime
 
 
@@ -13,13 +13,17 @@ class RiskFieldForm(forms.ModelForm):
 
     class Meta:
         model = RiskField
-        fields = ['name', 'field_type', 'max_length', 'null', 'default', 'kwargs']
+        fields = ['name', 'field_type', 'max_length', 'null', 'default', 'choices', 'kwargs']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.initial.get('name'):
             kwargs = self.initial['kwargs']
-            self.initial.update(kwargs)
+            update_kwargs = dict(kwargs)
+            if kwargs.get('choices'):
+                self.initial.update({'field_type': 'EnumField'})
+                update_kwargs.pop('choices')
+            self.initial.update(update_kwargs)
 
     def clean_name(self):
         value = self.cleaned_data.get('name')
@@ -51,6 +55,13 @@ class RiskFieldForm(forms.ModelForm):
             raise ValidationError("Text field type must have a max_length value")
         return value
 
+    def clean_choices(self):
+        value = self.cleaned_data.get('choices')
+        field_type = self.cleaned_data.get('field_type')
+        if field_type == 'EnumField' and value.count() == 0:
+            raise ValidationError('This field is required for Enum field')
+        return value
+
     def save(self, commit=True):
         form = super().save(commit=False)
         data = self.cleaned_data
@@ -62,8 +73,17 @@ class RiskFieldForm(forms.ModelForm):
         else:
             if default_val:
                 kwargs_data.update({'default': default_val})
+        if field_type == 'EnumField':
+            form.field_type = 'CharField'
+            kwargs_data.update({'choices': True, 'max_length': 20})
+        else:
+            data.update({'choices': []})
         kwargs_data.update({'null': data.get('null')})
         form.kwargs = kwargs_data
         if commit:
             form.save()
+            if len(list(data.get('choices'))) > 0:
+                form.choices.set([item.id for item in data.get('choices')])
+            else:
+                form.choices.set([])
         return form

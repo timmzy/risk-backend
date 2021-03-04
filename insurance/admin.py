@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import RiskField, Risk
+from .models import RiskField, Risk, EnumChoice
 from .model_utils import SchemaBuilder
 from .forms import RiskFieldForm
 from django.apps import apps
@@ -8,6 +8,7 @@ from django.apps import apps
 class RiskFieldLine(admin.TabularInline):
     model = RiskField
     form = RiskFieldForm
+    extra = 1
 
 
 @admin.register(Risk)
@@ -40,3 +41,8 @@ class RiskAdmin(admin.ModelAdmin):
             builder = SchemaBuilder(model)
             builder.delete_model()
         super().delete_model(request, queryset)
+
+
+@admin.register(EnumChoice)
+class EnumChoiceAdmin(admin.ModelAdmin):
+    list_display = ['choice', 'value']

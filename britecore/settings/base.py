@@ -43,7 +43,9 @@ INSTALLED_APPS = [
     'insurance',
     'rest_framework',
     'corsheaders',
-    'django_s3_storage'
+    'django_s3_storage',
+
+    'django_extensions'
 ]
 
 MIDDLEWARE = [

@@ -1,5 +1,7 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.core.exceptions import FieldDoesNotExist
+import re
 from .model_utils import create_model, SchemaBuilder
 from django.apps import apps
 
@@ -58,16 +60,38 @@ class Risk(models.Model):
         super().delete(*args, **kwargs)
 
 
-class RiskField(models.Model):
-    class RiskTypeField(models.TextChoices):
-        TEXT = 'CharField', 'Text'
-        NUMBER = 'IntegerField', 'Number'
-        DATE = 'DateField', 'Date'
+class EnumChoice(models.Model):
+    choice = models.CharField(max_length=20)
+    value = models.CharField(max_length=20)
 
-    name = models.CharField(max_length=50)
-    field_type = models.CharField(max_length=12, choices=RiskTypeField.choices, default=RiskTypeField.TEXT)
+    def __str__(self):
+        return self.choice
+
+
+def validate_variable(value):
+    if value[0].isdigit():
+        raise ValidationError(
+            'Must start with an alphabetical character'
+        )
+    if not re.match('^[a-zA-Z0-9_]+$', value):
+        raise ValidationError(
+            'Only alphanumeric characters and _ is allowed'
+        )
+
+
+class RiskField(models.Model):
+    RISK_FIELD_TYPE_CHOICE = (
+        ('CharField', 'Text'),
+        ('IntegerField', 'Number'),
+        ('DateField', 'Date'),
+        ('EnumField', 'Enum'),
+    )
+
+    name = models.CharField(max_length=50, validators=[validate_variable])
+    field_type = models.CharField(max_length=12, choices=RISK_FIELD_TYPE_CHOICE)
     risk = models.ForeignKey(Risk, on_delete=models.CASCADE, related_name='fields')
     kwargs = models.JSONField()
+    choices = models.ManyToManyField(EnumChoice, blank=True)
 
     class Meta:
         unique_together = (('name', 'risk'),)
@@ -75,8 +99,8 @@ class RiskField(models.Model):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.__old_name = self.name
-        self.__field_type = self.field_type
-        self.__old_kwargs = self.kwargs
+        # self.__field_type = self.field_type
+        # self.__old_kwargs = self.kwargs
 
     def get_django_field(self):
         "Returns the correct field type, instantiated with applicable settings"
@@ -87,6 +111,7 @@ class RiskField(models.Model):
         return getattr(models, self.field_type)(**dict(settings))
 
     def delete(self, **kwargs):
+        print("remove")
         # When a column/field is removed from the model, it removes from the table
         model = self.risk.get_django_model()
         field = model._meta.get_field(self.name)

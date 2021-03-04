@@ -1,9 +1,9 @@
 from .base import *
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'w8pq#t#$a8(rzv+lyrix55@6slp7u1n0fopt9=2um&@*+65$=$'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = True
+DEBUG = os.getenv('DEBUG')
 
 ALLOWED_HOSTS = []
 
@@ -15,9 +15,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'HOST': 'localhost',
         'POST': 5432,
-        'NAME': 'brite',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASS'),
     }
 }
 
